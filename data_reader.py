@@ -1,0 +1,110 @@
+import numpy as np
+import random
+import pickle
+import os
+# Data Reader class. Pass in data path with all patient files
+# Provides methods to get certain data
+class DataReader:
+    def __init__(self, data_path='input_data/'):
+        self.window_len = 30*256
+        self.num_channels = 1
+        self.data_path = data_path
+        self.x_train_data = list()
+        self.y_train_data = list()
+        self.x_test_data = list()
+        self.y_test_data = list()
+        self._read_data_directory()
+
+    def _read_data_directory(self):
+        self.patient_ids = os.listdir(self.data_path)
+        x_train_temp = list()
+        y_train_temp = list()
+        x_test_temp = list()
+        y_test_temp = list()
+        for pid in self.patient_ids:
+            pid_num = pid.lstrip('patient')
+            print("patient " + pid_num)
+            # get file names
+            x_file = self.data_path + pid + "/x_data" + pid_num + ".npy"
+            y_file = self.data_path + pid + "/y_data" + pid_num + ".npy"
+            interval_file = self.data_path + pid + "/intervals.data" 
+
+            # load data
+            x = np.load(str(x_file))
+            y = np.load(str(y_file))
+            num_time_steps = x.shape[0]
+            self.num_channels = x.shape[1]
+            #pickle_in = open(interval_file,"rb")
+            with open(interval_file, "rb") as f:
+                intervals = pickle.load(f)
+            #intervals = pickle.load(pickle_in)
+            intervals.append(num_time_steps)
+
+            # randomly select 30% of patients to be test
+            split_stat = "train"
+            #if random.random() < 0.30:  
+            #    split_stat = "test"
+            print(split_stat)
+            print("running add windows...")
+            self._add_windows(intervals, x, y, split_stat)
+            # randomly select 30% of patients to be test
+            #if random.random() < 0.30:   
+            #    x_test_temp.append(x1)
+            #    y_test_temp.append(y1)
+            #else:
+            #x_train_temp.append(x1)
+            #y_train_temp.append(y1)
+            break
+
+        print("done add windows...")
+        # once all of the windows are added
+        self.x_train_data = np.dstack(self.x_train_data)
+        self.y_train_data = np.asarray(self.y_train_data)
+        #print(self.x_train_data.shape)
+        self.x_train_data = np.rollaxis(self.x_train_data, -1)
+        #print(self.x_train_data.shape)
+        #self.x_test_data = np.dstack(self.x_test_data)
+        #self.y_test_data = np.asarray(self.y_test_data)
+        #print(self.x_test_data.shape)
+        #self.x_test_data = np.rollaxis(self.x_test_data, -1)
+        #print(self.x_test_data.shape)
+
+    def _add_windows(self, intervals, x, y, split_stat):
+        # create windows
+        # split every hour interval into num_windows
+        print(intervals)
+        for i in range(len(intervals)-1):
+        #for i in range(6):
+            print(str(i) + "/" + str(len(intervals)))
+            # hour 1
+            start = intervals[i]
+            end = intervals[i+1]
+            #print(str(start) + "," + str(end))
+
+            num_windows = np.int(np.floor((end-start)/self.window_len))
+            #print(str(num_windows))
+
+            # hour data
+            x_subset = x[start:end,:]
+            y_subset = y[start:end]
+
+            # within this hour split it up into windows
+            for j in range(num_windows):
+                window_x = x_subset[j*self.window_len:(j+1)*self.window_len,:]
+                window_y = int(max(y_subset[j*self.window_len:(j+1)*self.window_len]))
+                #print(window_x.shape)
+                if split_stat == "test":
+                    self.x_test_data.append(window_x)
+                    self.y_test_data.append(window_y)
+                else:
+                    self.x_train_data.append(window_x)
+                    self.y_train_data.append(window_y)
+        #print(temp_y[:10])
+        #temp_x = np.dstack(temp_x)
+        #x = np.rollaxis(temp_x, -1)
+        #return temp_x, temp_y
+
+class PatientInfo:
+    def __init__(self, pid, xdata, ydata, seizure_intervals):
+        self.xdata = ""
+

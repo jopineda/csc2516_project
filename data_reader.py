@@ -9,14 +9,26 @@ class DataReader:
         self.window_len = 30*256
         self.num_channels = 1
         self.data_path = data_path
-        self.x_train_data = list()
-        self.y_train_data = list()
-        self.x_test_data = list()
-        self.y_test_data = list()
+        self.x_data = list()
+        self.y_data = list()
+        self.patient_ids = os.listdir(self.data_path)
+        self.partition = dict()
+        #self._split_train_test_id()
+        self.test_split_frac = 0.30
         self._read_data_directory()
 
+    
+    #def _split_train_test_id(self):
+    #    self.partition['test'] = list()
+    #    self.partition['train'] = list()
+    #    for i in self.patient_i
+    #    ds:
+    #        if random.random() < self.test_split_frac:  
+    #            self.partition['test'].append(i)
+    #        else:
+    #            self.partition['train'].append(i)'''
+
     def _read_data_directory(self):
-        self.patient_ids = os.listdir(self.data_path)
         x_train_temp = list()
         y_train_temp = list()
         x_test_temp = list()
@@ -58,11 +70,11 @@ class DataReader:
 
         print("done add windows...")
         # once all of the windows are added
-        self.x_train_data = np.dstack(self.x_train_data)
-        self.y_train_data = np.asarray(self.y_train_data)
-        #print(self.x_train_data.shape)
-        self.x_train_data = np.rollaxis(self.x_train_data, -1)
-        #print(self.x_train_data.shape)
+        self.x_data = np.dstack(self.x_data)
+        self.y_data = np.asarray(self.y_data)
+        #print(self.x_data.shape)
+        self.x_data = np.rollaxis(self.x_data, -1)
+        #print(self.x_data.shape)
         #self.x_test_data = np.dstack(self.x_test_data)
         #self.y_test_data = np.asarray(self.y_test_data)
         #print(self.x_test_data.shape)
@@ -74,7 +86,7 @@ class DataReader:
         # split every hour interval into num_windows
         print(intervals)
         for i in range(len(intervals)-1):
-        #for i in range(6):
+        #for i in range(3):
             print(str(i) + "/" + str(len(intervals)))
             # hour 1
             start = intervals[i]
@@ -92,13 +104,12 @@ class DataReader:
             for j in range(num_windows):
                 window_x = x_subset[j*self.window_len:(j+1)*self.window_len,:]
                 window_y = int(max(y_subset[j*self.window_len:(j+1)*self.window_len]))
-                #print(window_x.shape)
-                if split_stat == "test":
-                    self.x_test_data.append(window_x)
-                    self.y_test_data.append(window_y)
-                else:
-                    self.x_train_data.append(window_x)
-                    self.y_train_data.append(window_y)
+                self.x_data.append(window_x)
+                self.y_data.append(window_y)
+                #file_name_x = "data/" + split_stat + "/x_" + str(pid) + "_" str(window_num) + ".npy"
+                #file_name_x = "data/" + split_stat + "/x_" + str(pid) + "_" str(window_num) + ".npy"
+                #np.save(file_name_x, window_x)
+                #np.save(file_name_y, window_y)
         #print(temp_y[:10])
         #temp_x = np.dstack(temp_x)
         #x = np.rollaxis(temp_x, -1)

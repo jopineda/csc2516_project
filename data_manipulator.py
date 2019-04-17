@@ -8,9 +8,10 @@ from sklearn import preprocessing
 def normalize_features(x_train, NUM_CHANNELS):
     print("normalizing features...")
     min_max_scaler = preprocessing.MinMaxScaler()
+    scaler = preprocessing.StandardScaler()
     x_scaled = list()
     for i in range(NUM_CHANNELS):
-        x_scaled.append(min_max_scaler.fit_transform(x_train[:,:,i]))
+        x_scaled.append(scaler.fit_transform(x_train[:,:,i]))
     x_scaled = np.dstack(x_scaled)
 
     print(x_scaled.shape)
@@ -38,6 +39,7 @@ def upsample_minority_class(x_train, y_train):
 
     print(df_minority_upsamples.shape)
     print(type(df_minority_upsamples))
+
     df_minority_upsampled = np.vstack((df_minority_upsamples, df_minority))
     print(df_minority_upsampled.shape)
 

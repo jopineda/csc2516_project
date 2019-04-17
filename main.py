@@ -27,7 +27,10 @@ def main():
 
     print("splitting training patient set...")
     # 70% training, 15% validation, 15% test
-    x_train, x_temp, y_train, y_temp = train_test_split(x_raw, y_raw, test_size=0.30, random_state=42)
+    print(x_raw[:5])
+    x_scaled = normalize_features(x_raw, 22)
+    print(x_scaled[:5])
+    x_train, x_temp, y_train, y_temp = train_test_split(x_scaled, y_raw, test_size=0.30, random_state=42)
     x_test, x_val, y_test, y_val = train_test_split(x_temp, y_temp, test_size=0.50, random_state=42)
     print(x_val.shape)
 
@@ -61,11 +64,12 @@ def run_1Dconv(x_train, y_train, x_val, y_val, x_test, y_test):
     NUM_CLASSES = 2
 
     # normalize features
-    print("normalizing features...")
-    x_scaled = normalize_features(x_train, NUM_CHANNELS)
+    #print("normalizing features...")
+    #x_scaled = normalize_features(x_train, NUM_CHANNELS)
 
     # print out stats
     num_seizure_in_val = len(np.where(y_val == 1))
+    print(y_val)
     print("num_seizure_in_val: " + str(num_seizure_in_val))
 
     print("model m: ")
@@ -107,7 +111,7 @@ def run_1Dconv(x_train, y_train, x_val, y_val, x_test, y_test):
     print("fitting model...")
     BATCH_SIZE = 100
     EPOCHS = 50
-    history_m = model_m.fit(x_scaled,
+    history_m = model_m.fit(x_train,
                       y_train,
                       batch_size=BATCH_SIZE,
                       epochs=EPOCHS,

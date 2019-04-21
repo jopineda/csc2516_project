@@ -5,13 +5,13 @@ import os
 # Data Reader class. Pass in data path with all patient files
 # Provides methods to get certain data
 class DataReader:
-    def __init__(self, data_path='input_data/'):
+    def __init__(self, patient_id, data_path='input_data/'):
         self.window_len = 30*256
         self.num_channels = 1
         self.data_path = data_path
         self.x_data = list()
         self.y_data = list()
-        self.patient_ids = os.listdir(self.data_path)
+        self.patient_id = patient_id
         self.partition = dict()
         #self._split_train_test_id()
         self.test_split_frac = 0.30
@@ -33,42 +33,42 @@ class DataReader:
         y_train_temp = list()
         x_test_temp = list()
         y_test_temp = list()
-        for pid in self.patient_ids:
-            pid_num = pid.lstrip('patient')
-            print("patient " + pid_num)
+       # for pid in self.patient_ids:
+       #     pid_num = pid.lstrip('patient')
+       #     print("patient " + pid_num)
             # get file names
-            x_file = self.data_path + pid + "/x_data" + pid_num + ".npy"
-            y_file = self.data_path + pid + "/y_data" + pid_num + ".npy"
-            interval_file = self.data_path + pid + "/intervals.data" 
+        pid_num = str(self.patient_id)
+        x_file = self.data_path + "/patient" + pid_num + "/x_data" + pid_num + ".npy"
+        y_file = self.data_path + "/patient" + pid_num + "/y_data" + pid_num + ".npy"
+        interval_file = self.data_path + "/patient" +pid_num+ "/intervals.data" 
 
-            # load data
-            x = np.load(str(x_file))
-            y = np.load(str(y_file))
-            num_time_steps = x.shape[0]
-            self.num_channels = x.shape[1]
-            #pickle_in = open(interval_file,"rb")
-            with open(interval_file, "rb") as f:
-                intervals = pickle.load(f)
-            #intervals = pickle.load(pickle_in)
-            intervals.append(num_time_steps)
+        # load data
+        x = np.load(str(x_file))
+        y = np.load(str(y_file))
+        num_time_steps = x.shape[0]
+        self.num_channels = x.shape[1]
+        #pickle_in = open(interval_file,"rb")
+        with open(interval_file, "rb") as f:
+            intervals = pickle.load(f)
+        #intervals = pickle.load(pickle_in)
+        intervals.append(num_time_steps)
 
-            # randomly select 30% of patients to be test
-            split_stat = "train"
-            #if random.random() < 0.30:  
-            #    split_stat = "test"
-            print(split_stat)
-            print("running add windows...")
-            self._add_windows(intervals, x, y, split_stat)
-            # randomly select 30% of patients to be test
-            #if random.random() < 0.30:   
-            #    x_test_temp.append(x1)
-            #    y_test_temp.append(y1)
-            #else:
-            #x_train_temp.append(x1)
-            #y_train_temp.append(y1)
-            break
+        # randomly select 30% of patients to be test
+        split_stat = "train"
+        #if random.random() < 0.30:  
+        #    split_stat = "test"
+        #print(split_stat)
+        #print("running add windows...")
+        self._add_windows(intervals, x, y, split_stat)
+        # randomly select 30% of patients to be test
+        #if random.random() < 0.30:   
+        #    x_test_temp.append(x1)
+        #    y_test_temp.append(y1)
+        #else:
+        #x_train_temp.append(x1)
+        #y_train_temp.append(y1)
 
-        print("done add windows...")
+        #print("done add windows...")
         # once all of the windows are added
         self.x_data = np.dstack(self.x_data)
         self.y_data = np.asarray(self.y_data)
@@ -104,6 +104,9 @@ class DataReader:
             for j in range(num_windows):
                 window_x = x_subset[j*self.window_len:(j+1)*self.window_len,:]
                 window_y = int(max(y_subset[j*self.window_len:(j+1)*self.window_len]))
+                #if window_y == 1:
+                    #print(y_subset[j*self.window_len:(j+1)*self.window_len])
+                    #print(float(np.count_nonzero(y_subset[j*self.window_len:(j+1)*self.window_len] == 1))/len(y_subset[j*self.window_len:(j+1)*self.window_len]))
                 self.x_data.append(window_x)
                 self.y_data.append(window_y)
                 #file_name_x = "data/" + split_stat + "/x_" + str(pid) + "_" str(window_num) + ".npy"

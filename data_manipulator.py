@@ -28,9 +28,6 @@ def upsample_minority_class(x_train, y_train):
     NUM_MAJ_SAMPLES = len(df_majority)
     NUM_MIN_SAMPLES = len(df_minority)
 
-    #print(df_majority.shape)
-    #print(df_minority.shape)
-
     # upsample minority class
     NUM_TO_ADD = NUM_MAJ_SAMPLES - NUM_MIN_SAMPLES
     min_indexes = random.choices(range(len(df_minority)), k=NUM_TO_ADD)
@@ -46,7 +43,7 @@ def upsample_minority_class(x_train, y_train):
     # combine majority class with upsampled minority class
     return df_upsampled_x, df_upsampled_y
 
-def downsample_minority_class(x_train, y_train):
+def downsample_majority_class(x_train, y_train):
     print("downsampling data...")
     # separate majority and minority classes in training data
     df_majority = x_train[np.where(y_train.flat == 0)]

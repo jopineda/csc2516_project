@@ -84,10 +84,10 @@ class DataReader:
     def _add_windows(self, intervals, x, y, split_stat):
         # create windows
         # split every hour interval into num_windows
-        print(intervals)
+        #print(intervals)
         for i in range(len(intervals)-1):
         #for i in range(3):
-            print(str(i) + "/" + str(len(intervals)))
+            #print(str(i) + "/" + str(len(intervals)))
             # hour 1
             start = intervals[i]
             end = intervals[i+1]

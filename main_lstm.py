@@ -200,7 +200,7 @@ def get_data():
     global PID
     df = DataReader(PID)
     x_raw = df.x_data
-    #y_raw = df.y_data.reshape(-1, 1)
+    y = df.y_data
     #print(x_raw.shape)
 
     #print("splitting training patient set...")

@@ -47,8 +47,9 @@ class DataReader:
         # once all of the windows are added
         self.x_data = np.dstack(self.x_data)
         self.y_data = np.asarray(self.y_data)
-        self.y_data = np.reshape(self.y_data,(self.num_windows,-1))
         self.x_data = np.rollaxis(self.x_data, -1)
+        self.y_data = np.reshape(self.y_data,(self.x_data.shape[0],-1))
+
 
     def _add_windows(self, intervals, x, y):
         # create windows

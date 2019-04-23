@@ -73,7 +73,7 @@ class DataReader:
             for j in range(self.num_windows):
                 window_x = x_subset[j*self.window_len:(j+1)*self.window_len,:]
                 for h in range(self.sub_windows):
-                    window_y = int(max(y_subset[(j*self.window_len+h*self.sub_window_len):(j*self.window_len+(h+1)*self.sub_window_len])))
+                    window_y = int(max(y_subset[(j*self.window_len+h*self.sub_window_len):(j*self.window_len+(h+1)*self.sub_window_len)]))
                     self.y_data.append(window_y)
                 #print(y_subset[j*self.window_len:(j+1)*self.window_len])
                 #total_seizure_timepoints += np.count_nonzero(y_subset[j*self.window_len:(j+1)*self.window_len] == 1)

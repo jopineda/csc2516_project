@@ -213,6 +213,9 @@ def get_data():
     x_scaled_1 = x_scaled[np.where(y.max(axis=1) == 1)]
     #y_scaled_1 = y_raw[np.where(y_raw.flat  == 1)]
     y_scaled_1 = y[np.where(y.max(axis=1) == 1)]
+    print(x_scaled_1.shape)
+    print(y_scaled_1.shape)
+    print(y_scaled_1)
     x_train_0, x_temp_0, y_train_0, y_temp_0 = train_test_split(x_scaled_0, y_scaled_0, test_size=0.30, random_state=42)
     x_test_0, x_val_0, y_test_0, y_val_0 = train_test_split(x_temp_0, y_temp_0, test_size=0.50, random_state=42)
     x_train_1, x_temp_1, y_train_1, y_temp_1 = train_test_split(x_scaled_1, y_scaled_1, test_size=0.30, random_state=42)

@@ -6,7 +6,7 @@ from sklearn import preprocessing
 # Data Manipulator file
 
 def normalize_features(x_train, NUM_CHANNELS):
-    print("normalizing features...")
+    #print("normalizing features...")
     min_max_scaler = preprocessing.MinMaxScaler()
     scaler = preprocessing.StandardScaler()
     x_scaled = list()
@@ -19,7 +19,7 @@ def normalize_features(x_train, NUM_CHANNELS):
 
 # code from: https://elitedatascience.com/imbalanced-classes
 def upsample_minority_class(x_train, y_train):
-    print("upsampling data...")
+    #print("upsampling data...")
     # separate majority and minority classes in training data
     df_majority = x_train[np.where(y_train.flat == 0)]
     df_minority = x_train[np.where(y_train.flat == 1)]
@@ -44,7 +44,7 @@ def upsample_minority_class(x_train, y_train):
     return df_upsampled_x, df_upsampled_y
 
 def downsample_majority_class(x_train, y_train):
-    print("downsampling data...")
+    #print("downsampling data...")
     # separate majority and minority classes in training data
     df_majority = x_train[np.where(y_train.flat == 0)]
     df_minority = x_train[np.where(y_train.flat == 1)]

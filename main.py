@@ -45,8 +45,14 @@ def main():
         for pid in args.PID:
             global PID
             PID = pid
-            print(PID)
+            #print(PID)
             x_train, y_train, x_val, y_val, x_test, y_test = get_data()
+            #print(x_train.shape)
+            #print(x_val.shape)
+            #print(x_test.shape)
+            #print(y_train.shape)
+            #print(y_val.shape)
+            #print(y_test.shape)
             run_best_1Dconv(x_train, y_train, x_val, y_val, x_test, y_test)
     else:
         # run bays opt
@@ -84,7 +90,7 @@ def run_best_1Dconv(x_train, y_train, x_val, y_val, x_test, y_test):
     TIME_PERIODS = x_train.shape[1]
     NUM_CHANNELS = x_train.shape[2]
     NUM_CLASSES = 2
-    RATE = 0.5
+    RATE = 0.6
     num_layers = 5
     init_num_filters = 10
     BATCH_SIZE = 100
@@ -118,8 +124,8 @@ def run_best_1Dconv(x_train, y_train, x_val, y_val, x_test, y_test):
     callbacks_list = [
             keras.callbacks.ModelCheckpoint(
             filepath='best_model.{epoch:02d}-{val_loss:.2f}.h5',
-            monitor='val_loss', save_best_only=True),
-            keras.callbacks.EarlyStopping(monitor='acc', patience=1)
+            monitor='val_loss', save_best_only=True, verbose=0),
+            keras.callbacks.EarlyStopping(monitor='acc', patience=1, verbose=0)
         ]
 
 
@@ -137,23 +143,41 @@ def run_best_1Dconv(x_train, y_train, x_val, y_val, x_test, y_test):
 
     global PID
     global SAMPLING_METHOD
-    eval(model_m, init_num_filters, num_layers, RATE, BATCH_SIZE, "best_" + SAMPLING_METHOD +"_"+ str(PID), x_val, y_val)
+    print("\n")
+    eval(model_m, init_num_filters, num_layers, RATE, BATCH_SIZE, "best_" + SAMPLING_METHOD +"_"+ str(PID), x_val, y_val, x_test, y_test)
+    keras.backend.clear_session()
 
 
-def eval(model, init_num_filters, num_layers, dropout_rate, batch_size, title, x_val, y_val):
+def eval(model, init_num_filters, num_layers, dropout_rate, batch_size, title, x_val, y_val, x_test, y_test):
     #print("plotting performance...")
-    y_pred_probs = model.predict(x_val)
-    y_pred = model.predict_classes(x_val)
-    auc = roc_auc_score(y_val, y_pred_probs)
-    fpr, tpr, thresholds = roc_curve(y_val, y_pred_probs)
-    recall = recall_score(y_val, y_pred)
-    prec = precision_score(y_val, y_pred)
-    f1 = f1_score(y_val, y_pred)
-    val_acc = accuracy_score(y_val, y_pred)
-    plot_roc(fpr, tpr, title)
+    # for validation set
+    val_y_pred_probs = model.predict(x_val)
+    val_y_pred = model.predict_classes(x_val)
+    val_auc = roc_auc_score(y_val, val_y_pred_probs)
+    val_fpr, val_tpr, val_thresholds = roc_curve(y_val, val_y_pred_probs)
+    val_recall = recall_score(y_val, val_y_pred)
+    val_prec = precision_score(y_val, val_y_pred)
+    val_f1 = f1_score(y_val, val_y_pred)
+    val_acc = accuracy_score(y_val, val_y_pred)
+    plot_roc(val_fpr, val_tpr, title + "_val")
+
+    test_y_pred_probs = model.predict(x_test)
+    test_y_pred = model.predict_classes(x_test)
+    test_auc = roc_auc_score(y_test, test_y_pred_probs)
+    test_fpr, test_tpr, test_thresholds = roc_curve(y_test, test_y_pred_probs)
+    test_recall = recall_score(y_test, test_y_pred)
+    test_prec = precision_score(y_test, test_y_pred)
+    test_f1 = f1_score(y_test, test_y_pred)
+    test_acc = accuracy_score(y_test, test_y_pred)
+    plot_roc(test_fpr, test_tpr, title + "_test")
     global PID
+
+    print("patient" + str(PID) + ", " + str(model.count_params()) + ", " +  str(init_num_filters) + ", " + str(num_layers) + ", " + str(dropout_rate) + ", " + str(batch_size) + ", " 
+        + str(val_auc) + ", " + str(val_recall) + ", " + str(val_prec) + ", " + str(val_f1) + ", " + str(val_acc) + ", " 
+        + str(test_auc) + ", " + str(test_recall) + ", " + str(test_prec) + ", " + str(test_f1) + ", " + str(test_acc) )
+
    
-    print("patient" + str(PID) + ", " + str(model.count_params()) + ", " +  str(init_num_filters) + ", " + str(num_layers) + ", " + str(dropout_rate) + ", " + str(batch_size) + ", " + str(auc) + ", " + str(recall) + ", " + str(prec) + ", " + str(f1) + ", " + str(val_acc) + ", " + str(fpr)+ ", " + str(tpr) + ", " + str(thresholds))
+    #print("patient" + str(PID) + ", " + str(model.count_params()) + ", " +  str(init_num_filters) + ", " + str(num_layers) + ", " + str(dropout_rate) + ", " + str(batch_size) + ", " + str(auc) + ", " + str(recall) + ", " + str(prec) + ", " + str(f1) + ", " + str(val_acc) + ", " + str(fpr)+ ", " + str(tpr) + ", " + str(thresholds))
     #print(str(pid) + ": " + str(model_m.count_params()) + ", init_num_filters: " + str(init_num_filters) + ", num_layers: " + str(num_layers) + ", dropout_rate: " + str(RATE) + ", batch_size: " + str(BATCH_SIZE)  + ", AUC: " + str(auc) + ", FPR: " + str(fpr) + ", TPR: " + str(tpr) + ", THRESHOLDS: " + str(thresh)+ ", recall: " +str(recall) + ", prec: " + str(prec) + ", f1: " + str(f1) +", val_acc: " +str(val_acc)  )
     #print("patient" +str(pid) + ": auroc= " + str(auc) + ", recall : " + str(recall) + ", precision= " + str(recall) + ", f1= " +str(f1) + ", val_acc= " + str(val_acc))
 

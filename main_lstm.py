@@ -97,8 +97,9 @@ def main():
     train_step = tf.train.AdagradOptimizer(0.3).minimize(total_loss)
     
     #model evaluation
-    correct_prediction=tf.equal(tf.round(predictions_series),batchY_placeholder)
-    accuracy=tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
+    #correct_prediction=tf.equal(tf.round(predictions_series),batchY_placeholder)
+    rounded_prediction=tf.round(predictions_series)
+    #accuracy=tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
     
     
     
@@ -152,6 +153,9 @@ def main():
             print("starting validation")
             val_accuracy = 0
             auc_value = 0
+            label_values = []   #maxed over 5 subwindows
+            val_values = []     #maxed over 5 subwindows
+            auc_values = []     #maxed over 5 subwindows
             for batch_idx in range(num_batches_val):
                 start_idx = batch_idx * truncated_backprop_length
                 end_idx = start_idx + truncated_backprop_length
@@ -166,7 +170,7 @@ def main():
                     print("set states to 0 in val")
               
                 _accuracy, _current_state, _predictions_series=sess.run(
-                    [accuracy, current_state, predictions_series],
+                    [rounded_prediction, current_state, predictions_series],
                     feed_dict={
                         batchX_placeholder: batchX,
                         batchY_placeholder: batchY,
@@ -175,11 +179,13 @@ def main():
                 })
             
                 _current_cell_state, _current_hidden_state = _current_state
-                val_accuracy+=_accuracy
-                auc_value += roc_auc_score(batchY, _predictions_series)
+                val_values.append(rounded_prediction.max)
+                #val_accuracy+=_accuracy
+                #auc_value += roc_auc_score(batchY, _predictions_series)
             
-            val_accuracy = val_accuracy/num_batches_val
-            auc_value = auc_value/num_batches_val
+            
+            #val_accuracy = val_accuracy/num_batches_val
+            #auc_value = auc_value/num_batches_val
             
             if batch_idx == 0:
                 max_val_accuracy = val_accuracy

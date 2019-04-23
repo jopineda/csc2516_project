@@ -38,13 +38,10 @@ def main():
     y_train = np.reshape(y_train,(batch_size_train,-1))
     x_val = np.reshape(x_val,(batch_size_val,-1,feature_size))
     y_val = np.reshape(y_val,(batch_size_val,-1))
-    x_test = np.reshape(x_test,(batch_size_test,-1,feature_size))
-    y_test = np.reshape(y_test,(batch_size_test,-1))
+    #x_test = np.reshape(x_test,(batch_size_test,-1,feature_size))
+    #y_test = np.reshape(y_test,(batch_size_test,-1))
     
-    #268800
     truncated_backprop_length = 5*256
-    #temp = 38400
-    #temp_val = 15360
     num_epochs = 100
     
     state_size = 64
@@ -53,19 +50,8 @@ def main():
     window_size = 30*256
     num_batches_train = x_train.shape[1]//truncated_backprop_length
     num_batches_val = x_val.shape[1]//truncated_backprop_length
-    num_batches_test = x_test.shape[1]//truncated_backprop_length
+    #num_batches_test = x_test.shape[1]//truncated_backprop_length
     num_layers = 2
-    
-    
-    #x = np.random.rand(139,temp,22)
-    
-    #t = temp//truncated_backprop_length
-    #y = np.zeros((139, t))
-    
-    
-    #x_val = np.random.rand(139,temp_val,22)
-    #t_val = temp_val//truncated_backprop_length
-    #y_val = np.zeros((139, t_val))
     
     
     """# LSTMs
@@ -129,7 +115,7 @@ def main():
                 if batch_idx%(window_size//truncated_backprop_length) == 0:
                     _current_cell_state = np.zeros((batch_size_train, state_size))
                     _current_hidden_state = np.zeros((batch_size_train, state_size))
-                    print("set states to 0")
+                    #print("set states to 0")
                 
                 _total_loss, _train_step, _current_state, _predictions_series = sess.run(
                     [total_loss, train_step, current_state, predictions_series],
@@ -167,9 +153,9 @@ def main():
                 if batch_idx%(window_size//truncated_backprop_length) == 0:
                     _current_cell_state = np.zeros((batch_size_val, state_size))
                     _current_hidden_state = np.zeros((batch_size_val, state_size))
-                    print("set states to 0 in val")
+                    #print("set states to 0 in val")
               
-                _accuracy, _current_state, _predictions_series=sess.run(
+                _rounded_prediction, _current_state, _predictions_series=sess.run(
                     [rounded_prediction, current_state, predictions_series],
                     feed_dict={
                         batchX_placeholder: batchX,
@@ -179,13 +165,35 @@ def main():
                 })
             
                 _current_cell_state, _current_hidden_state = _current_state
-                val_values.append(rounded_prediction.max)
+                label_values.append(batchY)
+                val_values.append(_rounded_prediction)
+                auc_values.append(_predictions_series)
                 #val_accuracy+=_accuracy
                 #auc_value += roc_auc_score(batchY, _predictions_series)
             
             
             #val_accuracy = val_accuracy/num_batches_val
             #auc_value = auc_value/num_batches_val
+            label_values = np.concatenate(label_values,axis=1)
+            val_values = np.concatenate(val_values,axis=1)
+            auc_values = np.concatenate(auc_values,axis=1)
+
+            how_many = num_batches_val//6
+            label_values = np.split(label_values,how_many,axis=1)
+            label_values = [x.max(axis=1) for x in label_values]
+            
+            val_values = np.split(val_values,how_many,axis=1)
+            val_values = [x.max(axis=1) for x in val_values]
+            
+            auc_values = np.split(auc_values,how_many,axis=1)
+            auc_values = [x.max(axis=1) for x in auc_values]
+            
+            label_values = np.concatenate(label_values,axis=0)
+            val_values = np.concatenate(val_values,axis=0)
+            auc_values = np.concatenate(auc_values,axis=0)
+            
+            val_accuracy = np.mean(label_values == val_values) # maxed over 5 subwindows
+            auc_value = roc_auc_score(label_values, auc_values) # maxed over 5 subwindows
             
             if batch_idx == 0:
                 max_val_accuracy = val_accuracy

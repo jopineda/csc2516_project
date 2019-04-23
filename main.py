@@ -33,7 +33,7 @@ def main():
     parser.add_argument("--run-hyperopt", action="store_true", required=False, dest="RUN_HYPEROPT", help="Run model")
     parser.add_argument("-s", "--sampling",   action="store", required=False, default='none', 
                             dest="SAMPLING_METHOD", choices=['upsample', 'downsample', 'none'], help="Run upsampling, downsampling, or nothing")
-    parser.add_argument("-p", "--pid", action="store", nargs='+', required=True, dest="PID", type=int, help="patient number (0-20]")
+    parser.add_argument("-p", "--pid", action="store", nargs='+', required=True, dest="PID", help="patient number (0-20]")
     args = parser.parse_args()
 
     global SAMPLING_METHOD

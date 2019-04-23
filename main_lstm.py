@@ -205,10 +205,10 @@ def get_data():
 
     #print("splitting training patient set...")
     x_scaled = normalize_features(x_raw, 22)
-    x_scaled_0 = x_scaled[np.where(y_raw.flat == 0)]
+    x_scaled_0 = x_scaled[np.where(y.max(axis=1) == 0)]
     #y_scaled_0 = y_raw[np.where(y_raw.flat == 0)]
     y_scaled_0 = y[np.where(y.max(axis=1) == 0)]
-    x_scaled_1 = x_scaled[np.where(y_raw.flat  == 1)]
+    x_scaled_1 = x_scaled[np.where(y.max(axis=1) == 1)]
     #y_scaled_1 = y_raw[np.where(y_raw.flat  == 1)]
     y_scaled_1 = y[np.where(y.max(axis=1) == 1)]
     x_train_0, x_temp_0, y_train_0, y_temp_0 = train_test_split(x_scaled_0, y_scaled_0, test_size=0.30, random_state=42)

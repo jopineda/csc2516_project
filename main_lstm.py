@@ -206,8 +206,10 @@ def get_data():
     #print("splitting training patient set...")
     x_scaled = normalize_features(x_raw, 22)
     x_scaled_0 = x_scaled[np.where(y.max(axis=1) == 0)]
+    print(x_scaled_0.shape)
     #y_scaled_0 = y_raw[np.where(y_raw.flat == 0)]
     y_scaled_0 = y[np.where(y.max(axis=1) == 0)]
+    print(y_scaled_0.shape)
     x_scaled_1 = x_scaled[np.where(y.max(axis=1) == 1)]
     #y_scaled_1 = y_raw[np.where(y_raw.flat  == 1)]
     y_scaled_1 = y[np.where(y.max(axis=1) == 1)]

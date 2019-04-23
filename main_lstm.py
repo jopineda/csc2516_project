@@ -9,7 +9,7 @@ import tensorflow as tf
 from tensorflow.contrib import rnn 
 import numpy as np
 from sklearn.metrics import roc_auc_score
-from data_reader import DataReader
+from data_reader_lstm import DataReader
 from data_manipulator import normalize_features, upsample_minority_class, downsample_majority_class
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
@@ -200,15 +200,17 @@ def get_data():
     global PID
     df = DataReader(PID)
     x_raw = df.x_data
-    y_raw = df.y_data.reshape(-1, 1)
+    #y_raw = df.y_data.reshape(-1, 1)
     #print(x_raw.shape)
 
     #print("splitting training patient set...")
     x_scaled = normalize_features(x_raw, 22)
     x_scaled_0 = x_scaled[np.where(y_raw.flat == 0)]
-    y_scaled_0 = y_raw[np.where(y_raw.flat == 0)]
+    #y_scaled_0 = y_raw[np.where(y_raw.flat == 0)]
+    y_scaled_0 = y[np.where(y.max(axis=1) == 0)]
     x_scaled_1 = x_scaled[np.where(y_raw.flat  == 1)]
-    y_scaled_1 = y_raw[np.where(y_raw.flat  == 1)]
+    #y_scaled_1 = y_raw[np.where(y_raw.flat  == 1)]
+    y_scaled_1 = y[np.where(y.max(axis=1) == 1)]
     x_train_0, x_temp_0, y_train_0, y_temp_0 = train_test_split(x_scaled_0, y_scaled_0, test_size=0.30, random_state=42)
     x_test_0, x_val_0, y_test_0, y_val_0 = train_test_split(x_temp_0, y_temp_0, test_size=0.50, random_state=42)
     x_train_1, x_temp_1, y_train_1, y_temp_1 = train_test_split(x_scaled_1, y_scaled_1, test_size=0.30, random_state=42)
@@ -220,7 +222,6 @@ def get_data():
     y_test = np.concatenate((y_test_0, y_test_1 ))
     x_val = np.vstack((x_val_0, x_val_1))
     y_val = np.concatenate((y_val_0, y_val_1 ))
-
 
     return x_train, y_train, x_test, y_test, x_val, y_val
 

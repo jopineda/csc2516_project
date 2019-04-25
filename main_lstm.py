@@ -10,7 +10,7 @@ from tensorflow.contrib import rnn
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from data_reader_lstm import DataReader
-from data_manipulator import normalize_features, upsample_minority_class, downsample_majority_class
+from data_manipulator_lstm import normalize_features, upsample_minority_class, downsample_majority_class
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 import sys, os, csv
@@ -19,7 +19,7 @@ import random
 import argparse
 
 PID = 2
-#SAMPLING_METHOD = 'none'
+SAMPLING_METHOD = 'upsample'
 
 def main():
 
@@ -240,6 +240,15 @@ def get_data():
     y_test = np.concatenate((y_test_0, y_test_1 ))
     x_val = np.vstack((x_val_0, x_val_1))
     y_val = np.concatenate((y_val_0, y_val_1 ))
+    
+    
+    global SAMPLING_METHOD
+    if SAMPLING_METHOD == 'upsample':
+        x_train, y_train = upsample_minority_class(x_train, y_train)
+        x_val, y_val = upsample_minority_class(x_val, y_val)
+    elif SAMPLING_METHOD == 'downsample':
+        x_train, y_train = downsample_majority_class(x_train, y_train)
+        x_val, y_val = downsample_majority_class(x_val, y_val)
 
     return x_train, y_train, x_test, y_test, x_val, y_val
 

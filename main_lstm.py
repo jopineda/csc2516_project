@@ -17,6 +17,7 @@ import sys, os, csv
 from sklearn.utils import resample
 import random
 import argparse
+from functools import reduce
 
 PID = 2
 SAMPLING_METHOD = 'upsample'
@@ -27,10 +28,17 @@ def main():
     # Data Setup
     x_train, y_train, x_val, y_val, x_test, y_test = get_data()
     
-    
-    batch_size_train = 227
-    batch_size_val = 243
-    batch_size_test = 43
+    #batch_size_train = 227
+    #batch_size_val = 243
+    #batch_size_test = 43
+    threshold = 500
+    fac = np.asarray(list(factors(x_train.shape[0])))
+    batch_size_train = fac[np.where(fac <= threshold)].max(axis=0)
+    fac = np.asarray(list(factors(x_val.shape[0])))
+    batch_size_val = fac[np.where(fac <= threshold)].max(axis=0)
+    fac = np.asarray(list(factors(x_test.shape[0])))
+    batch_size_test = fac[np.where(fac <= threshold)].max(axis=0)
+
     feature_size = 22
     
     x_train = np.reshape(x_train,(batch_size_train,-1,feature_size))
@@ -311,6 +319,12 @@ def get_data():
         x_val, y_val = downsample_majority_class(x_val, y_val)
 
     return x_train, y_train, x_test, y_test, x_val, y_val
+
+
+def factors(n):
+    return set(reduce(list.__add__,
+                      ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+
 
 if __name__ == '__main__':
     main()

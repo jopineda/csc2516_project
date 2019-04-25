@@ -18,8 +18,7 @@ from sklearn.utils import resample
 import random
 import argparse
 
-global PID
-PID = 1
+PID = 2
 #SAMPLING_METHOD = 'none'
 
 def main():

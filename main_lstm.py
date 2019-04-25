@@ -37,8 +37,8 @@ def main():
     y_train = np.reshape(y_train,(batch_size_train,-1))
     x_val = np.reshape(x_val,(batch_size_val,-1,feature_size))
     y_val = np.reshape(y_val,(batch_size_val,-1))
-    #x_test = np.reshape(x_test,(batch_size_test,-1,feature_size))
-    #y_test = np.reshape(y_test,(batch_size_test,-1))
+    x_test = np.reshape(x_test,(batch_size_test,-1,feature_size))
+    y_test = np.reshape(y_test,(batch_size_test,-1))
     
     truncated_backprop_length = 5*256
     num_epochs = 100
@@ -49,7 +49,7 @@ def main():
     window_size = 30*256
     num_batches_train = x_train.shape[1]//truncated_backprop_length
     num_batches_val = x_val.shape[1]//truncated_backprop_length
-    #num_batches_test = x_test.shape[1]//truncated_backprop_length
+    num_batches_test = x_test.shape[1]//truncated_backprop_length
     num_layers = 2
     
     
@@ -97,7 +97,7 @@ def main():
         early_stopping_counter = 0
         max_val_accuracy = 0
         for epoch_idx in range(num_epochs):
-            
+        
             _current_cell_state = np.zeros((batch_size_train, state_size))
             _current_hidden_state = np.zeros((batch_size_train, state_size))
             
@@ -138,9 +138,9 @@ def main():
             print("starting validation")
             val_accuracy = 0
             auc_value = 0
-            label_values = []   #maxed over 5 subwindows
-            val_values = []     #maxed over 5 subwindows
-            auc_values = []     #maxed over 5 subwindows
+            label_values = []   #maxed over 6 subwindows
+            val_values = []     #maxed over 6 subwindows
+            auc_values = []     #maxed over 6 subwindows
             for batch_idx in range(num_batches_val):
                 start_idx = batch_idx * truncated_backprop_length
                 end_idx = start_idx + truncated_backprop_length
@@ -191,8 +191,8 @@ def main():
             val_values = np.concatenate(val_values,axis=0)
             auc_values = np.concatenate(auc_values,axis=0)
             
-            val_accuracy = np.mean(label_values == val_values) # maxed over 5 subwindows
-            auc_value = roc_auc_score(label_values, auc_values) # maxed over 5 subwindows
+            val_accuracy = np.mean(label_values == val_values) # maxed over 6 subwindows
+            auc_value = roc_auc_score(label_values, auc_values) # maxed over 6 subwindows
             
             if batch_idx == 0:
                 max_val_accuracy = val_accuracy
@@ -208,7 +208,67 @@ def main():
                     
               
             print("Current Val Accuracy, Max Val Accuracy, Current AUC:", val_accuracy, max_val_accuracy, auc_value)
+
+
+        _current_cell_state = np.zeros((batch_size_test, state_size))
+        _current_hidden_state = np.zeros((batch_size_test, state_size))
+        print("starting testing")
+        test_accuracy = 0
+        test_auc = 0
+        label_values = []   #maxed over 6 subwindows
+        test_values = []    #maxed over 6 subwindows
+        auc_values = []     #maxed over 6 subwindows
+        for batch_idx in range(num_batches_test):
+            start_idx = batch_idx * truncated_backprop_length
+            end_idx = start_idx + truncated_backprop_length
+                
+            batchX = x_test[:,start_idx:end_idx,:]
+            batchY = y_test[:,batch_idx]
+            batchY = np.reshape(batchY,(-1,1))
+                
+            if batch_idx%(window_size//truncated_backprop_length) == 0:
+                _current_cell_state = np.zeros((batch_size_test, state_size))
+                _current_hidden_state = np.zeros((batch_size_test, state_size))
+                
+            _rounded_prediction, _current_state, _predictions_series=sess.run(
+                [rounded_prediction, current_state, predictions_series],
+                feed_dict={
+                          batchX_placeholder: batchX,
+                          batchY_placeholder: batchY,
+                          cell_state: _current_cell_state,
+                          hidden_state: _current_hidden_state
+            })
+
+            _current_cell_state, _current_hidden_state = _current_state
+            label_values.append(batchY)
+            test_values.append(_rounded_prediction)
+            auc_values.append(_predictions_series)
+
+        label_values = np.concatenate(label_values,axis=1)
+        test_values = np.concatenate(test_values,axis=1)
+        auc_values = np.concatenate(auc_values,axis=1)
+    
+        how_many = num_batches_test//6
+        label_values = np.split(label_values,how_many,axis=1)
+        label_values = [x.max(axis=1) for x in label_values]
+        
+        test_values = np.split(test_values,how_many,axis=1)
+        test_values = [x.max(axis=1) for x in test_values]
             
+        auc_values = np.split(auc_values,how_many,axis=1)
+        auc_values = [x.max(axis=1) for x in auc_values]
+            
+        label_values = np.concatenate(label_values,axis=0)
+        test_values = np.concatenate(test_values,axis=0)
+        auc_values = np.concatenate(auc_values,axis=0)
+            
+        test_accuracy = np.mean(label_values == test_values) # maxed over 5 subwindows
+        auc_value = roc_auc_score(label_values, auc_values) # maxed over 5 subwindows
+            
+        print("Test Accuracy, Test AUC:", test_accuracy, auc_value)
+
+
+
 def get_data():
     global PID
     df = DataReader(PID)

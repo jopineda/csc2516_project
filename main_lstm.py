@@ -62,6 +62,10 @@ def main():
     x_test = np.reshape(x_test,(batch_size_test,-1,feature_size))
     y_test = np.reshape(y_test,(batch_size_test,-1))
     
+    print("x_train_shape", x_train.shape)
+    print("x_val_shape", x_val.shape)
+    print("x_test_shape", x_test.shape)
+    
     truncated_backprop_length = 5*256
     num_epochs = 100
     
@@ -73,6 +77,11 @@ def main():
     num_batches_val = x_val.shape[1]//truncated_backprop_length
     num_batches_test = x_test.shape[1]//truncated_backprop_length
     num_layers = 2
+    
+    
+    print("num_batches_train", num_batches_train)
+    print("num_batches_val", num_batches_val)
+    print("num_batches_test", num_batches_test)
     
     
     """# LSTMs
@@ -151,7 +160,7 @@ def main():
                 
                 loss_list.append(_total_loss)
                      
-                if batch_idx%10 == 0:
+                if batch_idx%100 == 0:
                      print("Step",batch_idx, "Batch loss", _total_loss)
     
                 

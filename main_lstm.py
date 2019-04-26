@@ -63,8 +63,11 @@ def main():
     y_test = np.reshape(y_test,(batch_size_test,-1))
     
     print("x_train_shape", x_train.shape)
+    print("y_train_shape", y_train.shape)
     print("x_val_shape", x_val.shape)
+    print("y_val_shape", y_val.shape)
     print("x_test_shape", x_test.shape)
+    print("y_test_shape", y_test.shape)
     
     truncated_backprop_length = 5*256
     num_epochs = 100

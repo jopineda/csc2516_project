@@ -23,8 +23,22 @@ PID = 2
 SAMPLING_METHOD = 'upsample'
 
 def main():
+    # parse arguments
+    parser = argparse.ArgumentParser(description='Run model', add_help=True)
+    parser.add_argument("-s", "--sampling",   action="store", required=False, default='none', 
+                            dest="SAMPLING_METHOD", choices=['upsample', 'downsample', 'none'], help="Run upsampling, downsampling, or nothing")
+    parser.add_argument("-p", "--pid", action="store", required=True, 
+                            dest="PID", help="patient number (0-24]")
+    args = parser.parse_args()
 
+    global PID
+    PID = args.PID
+    global SAMPLING_METHOD
+    SAMPLING_METHOD = args.SAMPLING_METHOD
+    print(PID)
+    print(SAMPLING_METHOD)
 
+    
     # Data Setup
     x_train, y_train, x_val, y_val, x_test, y_test = get_data()
     
@@ -311,6 +325,7 @@ def get_data():
     
     
     global SAMPLING_METHOD
+    print(SAMPLING_METHOD)
     if SAMPLING_METHOD == 'upsample':
         x_train, y_train = upsample_minority_class(x_train, y_train)
         x_val, y_val = upsample_minority_class(x_val, y_val)

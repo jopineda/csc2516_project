@@ -49,6 +49,9 @@ def downsample_majority_class(x_train, y_train):
     # separate majority and minority classes in training data
     df_majority = x_train[np.where(y_train.max(axis=1) == 0)]
     df_minority = x_train[np.where(y_train.max(axis=1) == 1)]
+    
+    df_majority_y = y_train[np.where(y_train.max(axis=1) == 0)]
+    df_minority_y = y_train[np.where(y_train.max(axis=1) == 1)]
 
     # get number of majority
     NUM_MAJ_SAMPLES = len(df_majority)
@@ -58,10 +61,12 @@ def downsample_majority_class(x_train, y_train):
     NUM_TO_ADD = NUM_MIN_SAMPLES
     min_indexes = random.choices(range(len(df_majority)), k=NUM_TO_ADD)
     df_majority_downsampled = df_majority[min_indexes]
-
+    df_majority_downsampled_y = df_majority_y[min_indexes]
+    
     # merge classes again
     df_downsampled_x = np.vstack((df_majority_downsampled, df_minority))
-    df_downsampled_y = np.concatenate((np.zeros(NUM_MIN_SAMPLES), np.ones(NUM_MIN_SAMPLES)))
+    #df_downsampled_y = np.concatenate((np.zeros(NUM_MIN_SAMPLES), np.ones(NUM_MIN_SAMPLES)))
+    df_downsampled_y = np.vstack((df_majority_downsampled_y, df_minority_y))
     print("here2",df_downsampled_y.shape)
     # combine majority class with upsampled minority class
     return df_downsampled_x, df_downsampled_y
